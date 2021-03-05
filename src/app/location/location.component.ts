@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
+
 import { Location } from '../location';
 import { Weather } from '../weather';
 import { Forecast } from '../forecast';
@@ -16,6 +19,7 @@ export class LocationComponent implements OnInit {
   location?: Location;
   weather?: Weather;
   forecast?: Forecast;
+  errorMessage: string = '';
 
   getLocation (): Promise<Location> {
     return new Promise<Location>((resolve, reject) => {
@@ -32,11 +36,13 @@ export class LocationComponent implements OnInit {
 
   getWeather (location: Location) {
     this.weatherService.now(location)
+      .pipe(catchError(this.handleError<any>('getWeather')))
       .subscribe(weather => this.weather = weather);
   }
 
   getForecast (location: Location) {
     this.weatherService.forecast(location)
+      .pipe(catchError(this.handleError<any>('getForecast')))
       .subscribe(forecast => this.forecast = forecast);
   }
 
@@ -52,6 +58,19 @@ export class LocationComponent implements OnInit {
     locations.unshift(location);
     locations = locations.slice(0, 5);
     this.locationStorageService.set(locations);
+  }
+
+  private handleError<T> (operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+      this.errorMessage = operation + ' ';
+      if (error.error) {
+        this.errorMessage += error.error.message;
+      } else {
+        this.errorMessage += error.statusText;
+      }
+
+      return of(result as T);
+    };
   }
 
   constructor(
