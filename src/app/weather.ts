@@ -9,8 +9,12 @@ export interface Weather {
   };
   weather: [{
     description: string;
+    icon: string;
   }],
   wind: {
     speed: number;
+  },
+  sys: {
+    country: string;
   }
 }

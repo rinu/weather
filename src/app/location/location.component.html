@@ -1,7 +1,27 @@
-<div *ngIf="location">
-  <h2>{{location.display_name}}</h2>
-  <div *ngIf="weather">
-    <div>{{weather.weather[0].description}}</div>
-    <div>{{weather.main.temp}} °C</div>
-  </div>
+<div *ngIf="location && weather">
+  <h2>
+    <img [src]="'https://openweathermap.org/images/flags/' + (weather.sys.country | lowercase) + '.png'">
+    {{location.display_name}}
+  </h2>
+  <h2>
+    <img [src]="'https://openweathermap.org/img/wn/' + weather.weather[0].icon + '.png'">
+    {{weather.main.temp}} °C
+  </h2>
+  <h3>Feels like {{weather.main.feels_like}} °C</h3>
+  <div>{{weather.weather[0].description}}</div>
+  <div>Humidity: {{weather.main.humidity}} %</div>
+  <div>Pressure: {{weather.main.pressure}} hPa</div>
+  <div>Wind speed: {{weather.wind.speed}} m/s</div>
+</div>
+
+<div *ngIf="forecast">
+  <h3>8-day forecast</h3>
+  <ul>
+    <li *ngFor="let day of forecast.daily">
+      <span>{{day.dt * 1000 | date}}</span>
+      <img [src]="'https://openweathermap.org/img/wn/' + day.weather[0].icon + '.png'">
+      {{day.temp.max}} / {{day.temp.min}} °C
+      <small>{{day.weather[0].description}}</small>
+    </li>
+  </ul>
 </div>
