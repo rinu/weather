@@ -5,6 +5,7 @@ import { Weather } from '../weather';
 import { Forecast } from '../forecast';
 import { LocationService } from '../location.service';
 import { WeatherService } from '../weather.service';
+import { LocationStorageService } from '../location-storage.service';
 
 @Component({
   selector: 'app-location',
@@ -39,16 +40,32 @@ export class LocationComponent implements OnInit {
       .subscribe(forecast => this.forecast = forecast);
   }
 
+  storeLocation (location: Location) {
+    let locations = [];
+    if (this.locationStorageService.has()) {
+      locations = this.locationStorageService.get();
+    }
+    const index = locations.findIndex((loc: Location) => loc.display_name === location.display_name);
+    if (index !== -1) {
+      locations.splice(index, 1);
+    }
+    locations.unshift(location);
+    locations = locations.slice(0, 5);
+    this.locationStorageService.set(locations);
+  }
+
   constructor(
     private route: ActivatedRoute,
     private locationService: LocationService,
-    private weatherService: WeatherService
+    private weatherService: WeatherService,
+    private locationStorageService: LocationStorageService
   ) { }
 
   ngOnInit(): void {
     this.getLocation().then(location => {
       this.getWeather(location);
       this.getForecast(location);
+      this.storeLocation(location);
     });
   }
 }

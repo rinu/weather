@@ -1,6 +1,18 @@
+<div *ngIf="storeLocations.length">
+  <h2>Recent locations</h2>
+  <ul class="locations">
+    <li *ngFor="let location of storeLocations">
+      <a routerLink="/location/{{location.osm_type.substr(0, 1) | uppercase}}{{location.osm_id}}">
+        <span class="badge">{{location.osm_id}}</span> {{location.display_name}}
+      </a>
+    </li>
+  </ul>
+</div>
+
 <label>
   Location search: <input (keyup)="search($event)">
 </label>
+
 <div *ngIf="locations.length">
   <h2>Found locations</h2>
   <ul class="locations">
