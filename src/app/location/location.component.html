@@ -1,0 +1,7 @@
+<div *ngIf="location">
+  <h2>{{location.display_name}}</h2>
+  <div *ngIf="weather">
+    <div>{{weather.weather[0].description}}</div>
+    <div>{{weather.main.temp}} °C</div>
+  </div>
+</div>
