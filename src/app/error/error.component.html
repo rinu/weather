@@ -1,0 +1,6 @@
+<div *ngIf="errorService.message.length">
+  <div class="alert alert-danger mt-3">
+    {{errorService.message}}
+    <span class="clear float-right" (click)="errorService.clear()">x</span>
+  </div>
+</div>

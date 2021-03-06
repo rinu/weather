@@ -1,6 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { Location } from '../location';
@@ -9,6 +8,7 @@ import { Forecast } from '../forecast';
 import { LocationService } from '../location.service';
 import { WeatherService } from '../weather.service';
 import { LocationStorageService } from '../location-storage.service';
+import { ErrorService } from '../error.service';
 
 @Component({
   selector: 'app-location',
@@ -19,7 +19,6 @@ export class LocationComponent implements OnInit {
   location?: Location;
   weather?: Weather;
   forecast?: Forecast;
-  errorMessage: string = '';
 
   getLocation (): Promise<Location> {
     return new Promise<Location>((resolve, reject) => {
@@ -29,20 +28,20 @@ export class LocationComponent implements OnInit {
           .subscribe(locations => {
             this.location = locations[0];
             resolve(this.location);
-          });
+          }, error => reject(error));
       }
     });
   }
 
   getWeather (location: Location) {
     this.weatherService.now(location)
-      .pipe(catchError(this.handleError<any>('getWeather')))
+      .pipe(catchError(this.errorService.handle<any>('getWeather')))
       .subscribe(weather => this.weather = weather);
   }
 
   getForecast (location: Location) {
     this.weatherService.forecast(location)
-      .pipe(catchError(this.handleError<any>('getForecast')))
+      .pipe(catchError(this.errorService.handle<any>('getForecast')))
       .subscribe(forecast => this.forecast = forecast);
   }
 
@@ -60,31 +59,23 @@ export class LocationComponent implements OnInit {
     this.locationStorageService.set(locations);
   }
 
-  private handleError<T> (operation = 'operation', result?: T) {
-    return (error: any): Observable<T> => {
-      this.errorMessage = operation + ' ';
-      if (error.error) {
-        this.errorMessage += error.error.message;
-      } else {
-        this.errorMessage += error.statusText;
-      }
-
-      return of(result as T);
-    };
-  }
-
   constructor(
     private route: ActivatedRoute,
     private locationService: LocationService,
     private weatherService: WeatherService,
-    private locationStorageService: LocationStorageService
+    private locationStorageService: LocationStorageService,
+    private errorService: ErrorService
   ) { }
 
   ngOnInit(): void {
     this.getLocation().then(location => {
-      this.getWeather(location);
-      this.getForecast(location);
-      this.storeLocation(location);
+      if (location) {
+        this.getWeather(location);
+        this.getForecast(location);
+        this.storeLocation(location);
+      }
+    }, error => {
+      this.errorService.setMessageFromHttpError('getLocation', error);
     });
   }
 }

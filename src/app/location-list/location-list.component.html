@@ -1,0 +1,10 @@
+<ul class="list-group">
+  <li
+    *ngFor="let location of locations"
+    class="list-group-item"
+  >
+    <a routerLink="/location/{{location.osm_type.substr(0, 1) | uppercase}}{{location.osm_id}}">
+      {{location.display_name}}
+    </a>
+  </li>
+</ul>

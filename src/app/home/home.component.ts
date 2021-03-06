@@ -3,6 +3,8 @@ import { debounce } from 'lodash';
 import { Location } from '../location';
 import { LocationService } from '../location.service';
 import { LocationStorageService } from '../location-storage.service';
+import { ErrorService } from '../error.service';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'app-home',
@@ -17,7 +19,12 @@ export class HomeComponent implements OnInit {
     if (event.target) {
       const input = (event.target as HTMLInputElement).value;
       this.locationService.search(input)
-        .subscribe(locations => this.locations = locations)
+        .pipe(catchError(this.errorService.handle<any>('search')))
+        .subscribe(locations => {
+          if (locations) {
+            this.locations = locations
+          }
+        })
     }
   }
 
@@ -27,7 +34,8 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private locationService: LocationService,
-    private locationStorageService: LocationStorageService
+    private locationStorageService: LocationStorageService,
+    private errorService: ErrorService
   ) {
     this.search = debounce(this.search, 500) as (event: KeyboardEvent) => void;
   }
