@@ -1,4 +1,4 @@
-<div *ngIf="storeLocations.length">
+<div *ngIf="storeLocations && storeLocations.length">
   <h2 class="mt-3">Recent locations</h2>
   <app-location-list [locations]="storeLocations"></app-location-list>
 </div>
